@@ -66,24 +66,34 @@ export class TelegramWebApp {
     }
 
     private _tgWebAppJS: any = null;
-    public async init() : Promise<{success: boolean}> {
-        this._tgWebAppJS = await tgLoadPromise;
-
-        if (this._tgWebAppJS) {
-            return Promise.resolve({success: true});
-        } else {
-            return Promise.resolve({success: false});
+    public async init(): Promise<{success: boolean}> {
+        console.log("Initializing Telegram Web App...");
+        try {
+            this._tgWebAppJS = await tgLoadPromise;
+    
+            if (this._tgWebAppJS && (window as any).Telegram && (window as any).Telegram.WebApp) {
+                console.log("Telegram Web App SDK initialized successfully.");
+                return {success: true};
+            } else {
+                console.error("Telegram Web App SDK failed to initialize.");
+                return {success: false};
+            }
+        } catch (error) {
+            console.error("Error initializing Telegram Web App SDK:", error);
+            return {success: false};
         }
     }
+    
 
-    public openTelegramLink(url: string) {
+    public async openTelegramLink(url: string) {
         if (!this._tgWebAppJS) {
-            console.error("telegram web app is not inited!");
+            console.error("Telegram Web App is not initialized!");
             return;
         }
-        console.log(url);
+        console.log("Opening Telegram link:", url);
         this._tgWebAppJS.openTelegramLink(url);
     }
+    
 
     public share(url: string, text?: string) {
         const shareUrl = 'https://t.me/share/url?url=' + url + '&' + new URLSearchParams({ text: text || '' }).toString();
@@ -94,14 +104,14 @@ export class TelegramWebApp {
         return this._tgWebAppJS;
     }
 
-    public getTelegramWebAppInitData(): WebAppInitData {
+    public getTelegramWebAppInitData(): WebAppInitData | null {
         if (!this._tgWebAppJS) {
-            console.error("telegram web app is not inited!");
+            console.error("Telegram Web App is not initialized!");
             return null;
-        } 
+        }
         return this._tgWebAppJS.initDataUnsafe;
     }
-
+    
 
     public getTelegramUser(): WebAppUser {
         if (!this._tgWebAppJS) {
@@ -130,6 +140,16 @@ export class TelegramWebApp {
     public alert(message: string) {
         this._tgWebAppJS.showAlert(message);
     }
+    
+    public async someFunction() {
+        const result = await TelegramWebApp.Instance.init();
+        if (result.success) {
+            TelegramWebApp.Instance.openTelegramLink("https://example.com");
+        } else {
+            console.error("Telegram Web App initialization failed.");
+        }
+    }
+    
 }
 
 

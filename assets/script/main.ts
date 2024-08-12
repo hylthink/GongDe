@@ -1,5 +1,7 @@
-import { _decorator, Animation, AnimationClip, AnimationComponent, AnimationState, Asset, assetManager, Button, Component, DebugView, director, game, ImageAsset, Input, input, JsonAsset, Label, Node, Root, Sprite, SpriteFrame, Texture2D } from 'cc';
+import { _decorator, AnimationComponent, Node, Label, Color, Vec3, tween, EventTouch, assetManager, ImageAsset, SpriteFrame, Texture2D, Input, input, Component } from 'cc';
 import { TonSDK } from './ton-sdk';
+import { ObjectPool } from './ObjectPool'; 
+
 const { ccclass, property } = _decorator;
 
 @ccclass('Main')
@@ -13,7 +15,6 @@ export class Main extends Component {
     @property(Node) 
     shopNode: Node = null!;
 
-
     @property(Node) 
     infoNode: Node = null!;
 
@@ -23,16 +24,23 @@ export class Main extends Component {
     @property(Label) 
     idLabel: Label = null!;
 
-    @property(Sprite) 
-    iconSprite: Sprite = null!;
-
     @property(SpriteFrame) 
     iconSpriteFrame: SpriteFrame = null!;
 
     @property(Label) 
     jettonLabel: Label = null!;
 
+    @property(Label) 
+    demeritLabel: Label = null!; 
+    
+    @property(Node) 
+    maincanvasNode: Node = null!;
+
     private _tonsdk: TonSDK = null!;
+    private _clickCount: number = 0; 
+
+    private _floatingTextPool: ObjectPool = null!;
+    iconSprite: any;
 
     start() {
         this.menuNode.active = false;
@@ -42,8 +50,14 @@ export class Main extends Component {
         this._tonsdk = TonSDK.getInstance();
         this._tonsdk.init("https://muyu.bolinjoy.com/tonconnect-manifest.json").then(() => {
             this.menuNode.active = true;
-            this._showUserInfo()
+            this._showUserInfo();
         });
+
+        this._clickCount = 0;
+        this.demeritLabel.string = `功德：${this._clickCount}`;
+        
+        // 对象池
+        this._floatingTextPool = new ObjectPool(new Node());
     }
 
     protected onEnable(): void {
@@ -52,18 +66,54 @@ export class Main extends Component {
 
     protected onDisable(): void {
         input.off(Input.EventType.TOUCH_START, this._onTouchStart, this);
-
     }
 
-    private _onTouchStart() {
+    private _onTouchStart(event: EventTouch) {
         this.ani.play("hit");
-        this.ani.once(Animation.EventType.FINISHED, () => {
+    
+        this.ani.once(AnimationComponent.EventType.FINISHED, () => {
             this.ani.play("idle");
-        })
+        }, this);
+    
+        this._clickCount++;
+        this.demeritLabel.string = `功德：${this._clickCount}`;
+        
+        this._showFloatingText("功德+1");
+    }
+    
+    private _showFloatingText(text: string) {
+        const floatLabelNode = this._floatingTextPool.get();
+        const floatLabel = floatLabelNode.getComponent(Label);
+        floatLabel.string = text;
+        floatLabel.color = this._getRainbowColor();
+        
+        floatLabelNode.parent = this.maincanvasNode; 
+        floatLabelNode.position = new Vec3(0, 0, 0); 
+        
+        tween(floatLabelNode)
+            .to(1, { position: new Vec3(0, 200, 0) }) 
+            .call(() => {
+                this._floatingTextPool.put(floatLabelNode); 
+            })
+            .start();
+    }
+    
+    private _getRainbowColor(): Color {
+        const colors = [
+            new Color(255, 0, 0),    // Red
+            new Color(255, 127, 0),  // Orange
+            new Color(255, 255, 0),  // Yellow
+            new Color(0, 255, 0),    // Green
+            new Color(0, 0, 255),    // Blue
+            new Color(75, 0, 130),   // Indigo
+            new Color(148, 0, 211)   // Violet
+        ];
+        const index = Math.floor(Math.random() * colors.length);
+        return colors[index];
     }
 
     update(deltaTime: number) {
-        
+
     }
 
     public onBtnTonClick() {
@@ -73,7 +123,6 @@ export class Main extends Component {
         } else {
             this._tonsdk.openModal();
         }
-       
     }
 
     public onBtnShareClick() {
@@ -89,7 +138,6 @@ export class Main extends Component {
     public async onBtnShopClick() {
         this.shopNode.active = true;
         console.log("await this._tonsdk.showJetton")
-        // this.jettonLabel.string = "await this._tonsdk.showJetton"
         const jettonContent = await this._tonsdk.showJetton();
         console.log(jettonContent)
         this.jettonLabel.string = "jetton: " + jettonContent.name;
@@ -102,7 +150,6 @@ export class Main extends Component {
     public onBtnBuyTonClick() {
         this._tonsdk.buyTon(0.01);
     }
-
 
     public onBtnBuyStarClick() {
         this._tonsdk.buyStar(0.01)
@@ -141,6 +188,4 @@ export class Main extends Component {
             }
         }
     }
-
 }
-
