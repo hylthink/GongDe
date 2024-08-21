@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 import { _decorator, AnimationComponent, Node, Label, Color, Vec3, tween, EventTouch, assetManager, ImageAsset, SpriteFrame, Texture2D, Input, input, Component, Prefab } from 'cc';
 import { TonSDK } from './ton-sdk';
 import { ObjectPool } from './object-pool'; 
+=======
+import { _decorator, AnimationComponent, Node, Label, Color, Vec3, tween, EventTouch, assetManager, ImageAsset, SpriteFrame, Texture2D, Input, input, Component } from 'cc';
+import { TonSDK } from './ton-sdk';
+import { ObjectPool } from './ObjectPool'; 
+>>>>>>> c0a3ece599baf170fe27888693ec3e5d6ff9bb5c
 
 const { ccclass, property } = _decorator;
 
@@ -43,12 +49,15 @@ export class Main extends Component {
     private _clickCount: number = 0; 
 
     private _floatingTextPool: ObjectPool = null!;
+<<<<<<< HEAD
     private _floatingTextPosition: Vec3 = new Vec3(0, 0, 0);
     private _floatingTextEndPosition: Vec3 = new Vec3(0, 200, 0);
 
     @property(Node) 
     private _prefab: Node = null!; // Assumes this is being used or intended for future use
 
+=======
+>>>>>>> c0a3ece599baf170fe27888693ec3e5d6ff9bb5c
     iconSprite: any;
 
     start() {
@@ -61,12 +70,22 @@ export class Main extends Component {
         this._tonsdk.init("https://muyu.bolinjoy.com/tonconnect-manifest.json").then(() => {
             this.menuNode.active = true;
             this._showUserInfo();
+<<<<<<< HEAD
 
         });
 
         this._clickCount = 0;
         this._updateDemeritLabel();
         this._floatingTextPool = new ObjectPool(this.floatingTextPrefab);
+=======
+        });
+
+        this._clickCount = 0;
+        this.demeritLabel.string = `功德：${this._clickCount}`;
+        
+        // 对象池
+        this._floatingTextPool = new ObjectPool(new Node());
+>>>>>>> c0a3ece599baf170fe27888693ec3e5d6ff9bb5c
     }
 
     protected onEnable(): void {
@@ -79,6 +98,7 @@ export class Main extends Component {
 
     private _onTouchStart(event: EventTouch) {
         this.ani.play("hit");
+<<<<<<< HEAD
 
         this.ani.once(AnimationComponent.EventType.FINISHED, () => {
             this.ani.play("idle");
@@ -86,6 +106,15 @@ export class Main extends Component {
 
         this._clickCount++;
         this._updateDemeritLabel();
+=======
+    
+        this.ani.once(AnimationComponent.EventType.FINISHED, () => {
+            this.ani.play("idle");
+        }, this);
+    
+        this._clickCount++;
+        this.demeritLabel.string = `功德：${this._clickCount}`;
+>>>>>>> c0a3ece599baf170fe27888693ec3e5d6ff9bb5c
         
         this._showFloatingText("功德+1");
     }
@@ -97,12 +126,21 @@ export class Main extends Component {
         floatLabel.color = this._getRainbowColor();
         
         floatLabelNode.parent = this.maincanvasNode; 
+<<<<<<< HEAD
         floatLabelNode.position = this._floatingTextPosition;
         
         tween(floatLabelNode)
             .to(1, { position: this._floatingTextEndPosition })
             .call(() => {
                 this._floatingTextPool.put(floatLabelNode);
+=======
+        floatLabelNode.position = new Vec3(0, 0, 0); 
+        
+        tween(floatLabelNode)
+            .to(1, { position: new Vec3(0, 200, 0) }) 
+            .call(() => {
+                this._floatingTextPool.put(floatLabelNode); 
+>>>>>>> c0a3ece599baf170fe27888693ec3e5d6ff9bb5c
             })
             .start();
     }
@@ -119,6 +157,7 @@ export class Main extends Component {
         ];
         const index = Math.floor(Math.random() * colors.length);
         return colors[index];
+<<<<<<< HEAD
     }
 
     private _updateDemeritLabel() {
@@ -127,6 +166,12 @@ export class Main extends Component {
     }
 
     update(deltaTime: number) {
+=======
+    }
+
+    update(deltaTime: number) {
+
+>>>>>>> c0a3ece599baf170fe27888693ec3e5d6ff9bb5c
     }
 
     public onBtnTonClick() {
@@ -150,7 +195,11 @@ export class Main extends Component {
 
     public async onBtnShopClick() {
         this.shopNode.active = true;
+<<<<<<< HEAD
         console.log("await this._tonsdk.showJetton");
+=======
+        console.log("await this._tonsdk.showJetton")
+>>>>>>> c0a3ece599baf170fe27888693ec3e5d6ff9bb5c
         const jettonContent = await this._tonsdk.showJetton();
         console.log(jettonContent);
         this.jettonLabel.string = "jetton: " + jettonContent.name;
@@ -203,4 +252,8 @@ export class Main extends Component {
             }
         }
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> c0a3ece599baf170fe27888693ec3e5d6ff9bb5c
