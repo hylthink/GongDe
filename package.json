@@ -5,8 +5,11 @@
     "version": "3.8.3"
   },
   "dependencies": {
-    "@cocos-labs/game-sdk": "^0.0.4",
+    "@cocos-labs/game-sdk": "^0.0.7",
     "buffer": "^6.0.3",
     "Buffer": "^0.0.0"
-  }
+  },
+  "scripts": {
+  "start": "node ./server/.env"
+}
 }
